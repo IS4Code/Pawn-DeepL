@@ -1,0 +1,17 @@
+{
+    "user": "IllidanS4",
+    "repo": "DeepL",
+    "dependencies": ["sampctl/pawn-stdlib"],
+    "resources": [
+        {
+            "name": "DeepL.dll",
+            "platform": "windows",
+            "archive": false
+        },
+        {
+            "name": "DeepL.so",
+            "platform": "linux",
+            "archive": false
+        }
+    ]
+}

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="lib\sdk\amxplugin.cpp">
+      <Filter>lib\sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\deepl.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\natives.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\json\json11.cpp">
+      <Filter>lib\json</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cache.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\sdk\plugincommon.h">
+      <Filter>lib\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\sdk\plugin.h">
+      <Filter>lib\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\sdk\amx\amx.h">
+      <Filter>lib\sdk\amx</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\sdk\amx\getch.h">
+      <Filter>lib\sdk\amx</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\sdk\amx\sclinux.h">
+      <Filter>lib\sdk\amx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\main.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\deepl.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\natives.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\json\json11.hpp">
+      <Filter>lib\json</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cache.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DeepL.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="lib">
+      <UniqueIdentifier>{a4fd26cf-a2b4-4803-8d67-b7b0d036eb21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\sdk">
+      <UniqueIdentifier>{e2d507f8-555b-42b7-adcf-ecafaa28b415}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\sdk\amx">
+      <UniqueIdentifier>{072cd0b9-a015-41e5-bd5a-94e3e77f6ba3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{14346158-17c8-4f00-97a4-366965acac73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\json">
+      <UniqueIdentifier>{fa08e708-8ba5-465e-ae6b-b4dc64697417}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
