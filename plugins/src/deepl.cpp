@@ -118,7 +118,7 @@ public:
 	curl_handle finish()
 	{
 		fields.resize(short_len);
-		cache::set(fields, response);
+		cache::set_or_get(fields, response);
 		callback(std::move(response));
 		return std::move(handle);
 	}
