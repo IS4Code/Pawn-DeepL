@@ -3,7 +3,7 @@
 #include "cache.h"
 
 #define CURL_STATICLIB
-#include <curl\curl.h>
+#include <curl/curl.h>
 
 #include <memory>
 #include <queue>
@@ -59,19 +59,6 @@ void deepl::unload()
 	curl_pool.empty();
 	curlm_ptr = nullptr;
 }
-
-/*static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
-{
-	struct WriteThis *pooh = (struct WriteThis *)userp;
-
-	if(size*nmemb sizeleft) {
-		*(char *)ptr = pooh->readptr[0];
-		pooh->readptr++;
-		pooh->sizeleft--;
-		return 1;
-	}
-	return 0;
-}*/
 
 curl_handle curl_easy_get()
 {
