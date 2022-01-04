@@ -78,7 +78,7 @@ class curl_request
 	curl_handle handle;
 	std::string fields;
 	size_t short_len;
-	std::function<void(const std::string&)> callback;
+	deepl::callback_func callback;
 
 	std::string response;
 
@@ -89,7 +89,7 @@ class curl_request
 	}
 
 public:
-	curl_request(curl_handle handle, std::string fields, size_t short_len, std::function<void(const std::string&)> callback) : handle(std::move(handle)), fields(std::move(fields)), short_len(short_len), callback(std::move(callback))
+	curl_request(curl_handle handle, std::string fields, size_t short_len, deepl::callback_func callback) : handle(std::move(handle)), fields(std::move(fields)), short_len(short_len), callback(std::move(callback))
 	{
 		auto curl = this->handle.get();
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, this->fields.c_str());
@@ -102,11 +102,14 @@ public:
 		});
 	}
 
-	curl_handle finish()
+	curl_handle finish(long status_code)
 	{
-		fields.resize(short_len);
-		cache::set_or_get(fields, response);
-		callback(std::move(response));
+		if(status_code == 200)
+		{
+			fields.resize(short_len);
+			cache::set_or_get(fields, response);
+		}
+		callback(std::move(response), status_code);
 		return std::move(handle);
 	}
 };
@@ -116,17 +119,17 @@ std::unordered_map<CURL*, std::unique_ptr<curl_request>> requests;
 class fake_request
 {
 	const std::string&response;
-	std::function<void(const std::string&)> callback;
+	deepl::callback_func callback;
 
 public:
-	fake_request(const std::string &response, std::function<void(const std::string&)> callback) : response(std::move(response)), callback(std::move(callback))
+	fake_request(const std::string &response, deepl::callback_func callback) : response(std::move(response)), callback(std::move(callback))
 	{
 
 	}
 
 	void process() const
 	{
-		callback(response);
+		callback(response, 200);
 	}
 };
 
@@ -156,11 +159,14 @@ void deepl::process()
 				{
 					curl_easy_cleanup(curl);
 				}else{
+					long http_code = 0;
+					curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+
 					std::unique_ptr<curl_request> request;
 					std::swap(request, it->second);
 					requests.erase(it);
 
-					curl_pool.push(request->finish());
+					curl_pool.push(request->finish(http_code));
 				}
 			}
 		}while(msg);
@@ -174,7 +180,7 @@ void deepl::process()
 	}
 }
 
-int deepl::make_request(bool preserve_formatting, const char *tag_handling, const char *source_lang, const char *target_lang, const std::string&text, std::function<void(const std::string&)> callback)
+int deepl::make_request(bool preserve_formatting, const char *tag_handling, const char *source_lang, const char *target_lang, const std::string&text, deepl::callback_func callback)
 {
 	auto curl_handle = curl_easy_get();
 	auto curl = curl_handle.get();

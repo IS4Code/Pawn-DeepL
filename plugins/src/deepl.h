@@ -6,11 +6,13 @@
 
 namespace deepl
 {
+	typedef std::function<void(const std::string &response, long status_code)> callback_func;
+
 	void load();
 	void process();
 	void unload();
 
-	int make_request(bool preserve_formatting, const char *tag_handling, const char *source_lang, const char *target_lang, const std::string &text, std::function<void(const std::string&)> callback);
+	int make_request(bool preserve_formatting, const char *tag_handling, const char *source_lang, const char *target_lang, const std::string &text, callback_func callback);
 
 	extern std::string auth_key;
 }

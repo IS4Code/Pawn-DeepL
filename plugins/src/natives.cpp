@@ -69,7 +69,7 @@ namespace Natives
 		std::string to_locale = to_locale_ptr ? to_locale_ptr : "";
 
 		auto amx_handle = get_amx(amx);
-		return deepl::make_request(true, tags, from, to, text, [callback, amx_handle, cookie, to_locale](const std::string &result)
+		return deepl::make_request(true, tags, from, to, text, [callback, amx_handle, cookie, to_locale](const std::string &result, long status_code)
 		{
 			if(auto handle = amx_handle.lock())
 			{
@@ -90,6 +90,11 @@ namespace Natives
 							success = true;
 							break;
 						}
+					}
+					if(!success)
+					{
+						const auto &msg = json["message"];
+						message = msg.string_value();
 					}
 				}
 
