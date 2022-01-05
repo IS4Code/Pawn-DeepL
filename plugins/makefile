@@ -14,7 +14,7 @@ clean:
   
 static: GPP = g++ -m32 -std=c++11 -Ilib -Isrc -fno-stack-protector -static-libgcc -static-libstdc++
 static: GCC = gcc -m32 -Ilib -Isrc -fno-stack-protector -static-libgcc -static-libstdc++
-static: LINK = $(GPP)
+static: LINK = $(GPP) -lcurl
 static: all
 
 DeepL: clean
