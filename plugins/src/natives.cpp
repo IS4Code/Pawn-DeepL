@@ -1,5 +1,6 @@
 #include "natives.h"
 #include "deepl.h"
+#include "cache.h"
 #include "main.h"
 
 #include "json/json11.hpp"
@@ -139,10 +140,17 @@ namespace Natives
 
 		return 1;
 	}
+
+	cell LoadCache(AMX *amx, cell *params)
+	{
+		cache::load();
+		return 1;
+	}
 }
 
 AMX_NATIVE_INFO natives[] = {
 	{ "DeepL_SetAuthKey", Natives::SetAuthKey },
 	{ "DeepL_Translate", Natives::Translate },
+	{ "DeepL_LoadCache", Natives::LoadCache },
 	{ nullptr, nullptr }
 };
