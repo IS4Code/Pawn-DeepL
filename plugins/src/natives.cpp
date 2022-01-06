@@ -20,6 +20,33 @@ char *split_locale(char *str)
 	return pos;
 }
 
+char *split_locale_alt(char *str)
+{
+	auto pos = std::strstr(str, "|");
+	if(pos)
+	{
+		*pos = '\0';
+		++pos;
+	}
+	return pos;
+}
+
+std::locale find_locale(char *&spec)
+{
+	char *nextspec;
+	while(nextspec = split_locale_alt(spec))
+	{
+		try{
+			return std::locale(spec);
+		}catch(const std::runtime_error &)
+		{
+
+		}
+		spec = nextspec;
+	}
+	return std::locale(spec);
+}
+
 static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
 
 namespace Natives
@@ -57,20 +84,34 @@ namespace Natives
 		std::string callback(len, '\0');
 		amx_GetString(&callback[0], addr, false, len + 1);
 
-		char *from_locale = split_locale(from);
-		if(from_locale)
+		if(auto from_locale = split_locale(from))
 		{
-			std::locale loc(from_locale);
-			std::wstring buffer(text.size(), L'\0');
-			std::use_facet<std::ctype<wchar_t>>(loc).widen(text.data(), text.data() + text.size(), &buffer[0]);
-			text = utf8.to_bytes(buffer.data());
+			try{
+				auto loc = find_locale(from_locale);
+				std::wstring buffer(text.size(), L'\0');
+				std::use_facet<std::ctype<wchar_t>>(loc).widen(text.data(), text.data() + text.size(), &buffer[0]);
+				text = utf8.to_bytes(buffer.data());
+			}catch(const std::exception &e)
+			{
+				logprintf("[DeepL] Translate error: %s (input locale %s)", e.what(), from_locale);
+				return -1;
+			}
 		}
 
-		char *to_locale_ptr = split_locale(to);
-		std::string to_locale = to_locale_ptr ? to_locale_ptr : "";
+		std::locale *to_locale_ptr = nullptr;
+		if(auto to_locale = split_locale(to))
+		{
+			try{
+				to_locale_ptr = new std::locale(find_locale(to_locale));
+			}catch(const std::exception &e)
+			{
+				logprintf("[DeepL] Translate error: %s (output locale %s)", e.what(), to_locale);
+				return -1;
+			}
+		}
 
 		auto amx_handle = get_amx(amx);
-		return deepl::make_request(true, tags, from, to, text, [callback, amx_handle, cookie, to_locale](const std::string &result, long status_code)
+		return deepl::make_request(true, tags, from, to, text, [callback, amx_handle, cookie, to_locale_ptr](const std::string &result, long status_code)
 		{
 			if(auto handle = amx_handle.lock())
 			{
@@ -99,12 +140,21 @@ namespace Natives
 					}
 				}
 
-				if(!to_locale.empty())
+				if(to_locale_ptr)
 				{
-					auto buffer = utf8.from_bytes(message);
-					std::locale loc(to_locale.c_str());
-					message.resize(buffer.size(), '\0');
-					std::use_facet<std::ctype<wchar_t>>(loc).narrow(buffer.data(), buffer.data() + buffer.size(), '?', &message[0]);
+					if(success)
+					{
+						try{
+							auto buffer = utf8.from_bytes(message);
+							message.resize(buffer.size(), '\0');
+							std::use_facet<std::ctype<wchar_t>>(*to_locale_ptr).narrow(buffer.data(), buffer.data() + buffer.size(), '?', &message[0]);
+						}catch(const std::exception &e)
+						{
+							message = e.what();
+							success = false;
+						}
+					}
+					delete to_locale_ptr;
 				}
 
 				int index;
@@ -137,8 +187,6 @@ namespace Natives
 				amx_Release(amx, message_addr);
 			}
 		});
-
-		return 1;
 	}
 
 	cell LoadCache(AMX *amx, cell *params)
