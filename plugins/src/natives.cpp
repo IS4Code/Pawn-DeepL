@@ -72,12 +72,17 @@ namespace Natives
 		std::string text(len, '\0');
 		amx_GetString(&text[0], addr, false, len + 1);
 
-		char *from, *to, *tags;
+		char *from, *to;
 		amx_StrParam(amx, params[2], from);
 		amx_StrParam(amx, params[3], to);
-		bool formatting = params[5];
-		amx_StrParam(amx, params[6], tags);
-		cell cookie = params[7];
+
+		cell cookie = params[5];
+
+		bool preserve_formatting = params[6];
+		char *tag_handling, *formality, *split_sentences;
+		amx_StrParam(amx, params[7], tag_handling);
+		amx_StrParam(amx, params[8], formality);
+		amx_StrParam(amx, params[9], split_sentences);
 
 		amx_GetAddr(amx, params[4], &addr);
 		amx_StrLen(addr, &len);
@@ -111,7 +116,7 @@ namespace Natives
 		}
 
 		auto amx_handle = get_amx(amx);
-		return deepl::make_request(true, tags, from, to, text, [callback, amx_handle, cookie, to_locale_ptr](const std::string &result, long status_code)
+		return deepl::make_request(preserve_formatting, tag_handling, formality, split_sentences, from, to, text, [callback, amx_handle, cookie, to_locale_ptr](const std::string &result, long status_code)
 		{
 			if(auto handle = amx_handle.lock())
 			{
@@ -160,12 +165,12 @@ namespace Natives
 				int index;
 				if(amx_FindPublic(amx, callback.c_str(), &index) != AMX_ERR_NONE)
 				{
-					return;
+					return false;
 				}
 				cell message_addr, *message_ptr;
 				if(amx_Allot(amx, message.size() + 1, &message_addr, &message_ptr) != AMX_ERR_NONE)
 				{
-					return;
+					return false;
 				}
 				amx_SetString(message_ptr, message.c_str(), false, false, message.size() + 1);
 
@@ -173,7 +178,7 @@ namespace Natives
 				if(amx_Allot(amx, from.size() + 1, &from_addr, &from_ptr) != AMX_ERR_NONE)
 				{
 					amx_Release(amx, message_addr);
-					return;
+					return false;
 				}
 				amx_SetString(from_ptr, from.c_str(), false, false, from.size() + 1);
 
@@ -185,7 +190,10 @@ namespace Natives
 				amx_Exec(amx, &retval, index);
 
 				amx_Release(amx, message_addr);
+
+				return static_cast<bool>(retval);
 			}
+			return false;
 		});
 	}
 

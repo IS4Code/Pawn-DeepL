@@ -24,7 +24,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData)
 	deepl::load();
 	cache::load();
 
-	logprintf(" DeepL API v1.0 loaded");
+	logprintf(" DeepL API v1.1 loaded");
 	logprintf(" Created by IllidanS4");
 	return true;
 }

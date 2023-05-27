@@ -104,12 +104,12 @@ public:
 
 	curl_handle finish(long status_code)
 	{
-		if(status_code == 200)
+		bool should_cache = callback(response, status_code);
+		if(should_cache && status_code == 200)
 		{
 			fields.resize(short_len);
 			cache::set_or_get(fields, response);
 		}
-		callback(std::move(response), status_code);
 		return std::move(handle);
 	}
 };
@@ -118,7 +118,7 @@ std::unordered_map<CURL*, std::unique_ptr<curl_request>> requests;
 
 class fake_request
 {
-	const std::string&response;
+	const std::string &response;
 	deepl::callback_func callback;
 
 public:
@@ -180,7 +180,7 @@ void deepl::process()
 	}
 }
 
-int deepl::make_request(bool preserve_formatting, const char *tag_handling, const char *source_lang, const char *target_lang, const std::string&text, deepl::callback_func callback)
+int deepl::make_request(bool preserve_formatting, const char *tag_handling, const char *formality, const char *split_sentences, const char *source_lang, const char *target_lang, const std::string&text, deepl::callback_func callback)
 {
 	auto curl_handle = curl_easy_get();
 	auto curl = curl_handle.get();
@@ -206,6 +206,22 @@ int deepl::make_request(bool preserve_formatting, const char *tag_handling, cons
 	{
 		fields += "&tag_handling=";
 		encoded = curl_easy_escape(curl, tag_handling, 0);
+		fields += encoded;
+		curl_free(encoded);
+	}
+
+	if(formality)
+	{
+		fields += "&formality=";
+		encoded = curl_easy_escape(curl, formality, 0);
+		fields += encoded;
+		curl_free(encoded);
+	}
+
+	if(split_sentences)
+	{
+		fields += "&split_sentences=";
+		encoded = curl_easy_escape(curl, split_sentences, 0);
 		fields += encoded;
 		curl_free(encoded);
 	}
