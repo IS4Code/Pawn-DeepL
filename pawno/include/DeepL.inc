@@ -1,4 +1,4 @@
-/** DeepL v1.1 by IllidanS4 **/
+/** DeepL v1.2 by IS4 **/
 //github.com/IS4Code/Pawn-DeepL
 
 #if defined _inc_DeepL

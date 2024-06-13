@@ -24,8 +24,8 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData)
 	deepl::load();
 	cache::load();
 
-	logprintf(" DeepL API v1.1 loaded");
-	logprintf(" Created by IllidanS4");
+	logprintf(" DeepL API v1.2 loaded");
+	logprintf(" Created by IS4");
 	return true;
 }
 
@@ -33,7 +33,7 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 {
 	deepl::unload();
 
-	logprintf(" DeepL API v1.0 unloaded");
+	logprintf(" DeepL API v1.2 unloaded");
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
