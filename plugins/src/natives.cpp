@@ -63,6 +63,18 @@ namespace Natives
 		return 1;
 	}
 
+	cell SetEndpoint(AMX *amx, cell *params)
+	{
+		cell *endpoint;
+		amx_GetAddr(amx, params[1], &endpoint);
+		int len;
+		amx_StrLen(endpoint, &len);
+
+		auto &str = deepl::endpoint_url = std::string(len, '\0');
+		amx_GetString(&str[0], endpoint, false, len + 1);
+		return 1;
+	}
+
 	cell Translate(AMX *amx, cell *params)
 	{
 		cell *addr;
@@ -206,6 +218,7 @@ namespace Natives
 
 AMX_NATIVE_INFO natives[] = {
 	{ "DeepL_SetAuthKey", Natives::SetAuthKey },
+	{ "DeepL_SetEndpoint", Natives::SetEndpoint },
 	{ "DeepL_Translate", Natives::Translate },
 	{ "DeepL_LoadCache", Natives::LoadCache },
 	{ nullptr, nullptr }

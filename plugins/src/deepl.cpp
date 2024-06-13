@@ -11,6 +11,7 @@
 #include <vector>
 
 std::string deepl::auth_key;
+std::string deepl::endpoint_url = "https://api-free.deepl.com/v2/translate";
 
 struct curlm_deleter
 {
@@ -187,7 +188,7 @@ int deepl::make_request(bool preserve_formatting, const char *tag_handling, cons
 
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, http_headers.get());
 
-	curl_easy_setopt(curl, CURLOPT_URL, "https://api-free.deepl.com/v2/translate");
+	curl_easy_setopt(curl, CURLOPT_URL, endpoint_url.c_str());
 	curl_easy_setopt(curl, CURLOPT_POST, 1);
 	
 	std::string fields;
