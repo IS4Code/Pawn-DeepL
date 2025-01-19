@@ -58,8 +58,10 @@ namespace Natives
 		int len;
 		amx_StrLen(key, &len);
 
-		auto &str = deepl::auth_key = std::string(len, '\0');
-		amx_GetString(&str[0], key, false, len + 1);
+		auto &str = deepl::auth_header = "Authorization: DeepL-Auth-Key ";
+		auto start = str.size();
+		str.resize(start + len);
+		amx_GetString(&str[start], key, false, len + 1);
 		return 1;
 	}
 

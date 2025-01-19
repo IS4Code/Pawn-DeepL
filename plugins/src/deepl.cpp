@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
-std::string deepl::auth_key;
+std::string deepl::auth_header;
 std::string deepl::endpoint_url = "https://api-free.deepl.com/v2/translate";
 
 struct curlm_deleter
@@ -78,7 +78,6 @@ class curl_request
 {
 	curl_handle handle;
 	std::string fields;
-	size_t short_len;
 	deepl::callback_func callback;
 
 	std::string response;
@@ -90,9 +89,13 @@ class curl_request
 	}
 
 public:
-	curl_request(curl_handle handle, std::string fields, size_t short_len, deepl::callback_func callback) : handle(std::move(handle)), fields(std::move(fields)), short_len(short_len), callback(std::move(callback))
+	curl_request(curl_handle handle, std::string fields, deepl::callback_func callback) : handle(std::move(handle)), fields(std::move(fields)), callback(std::move(callback))
 	{
 		auto curl = this->handle.get();
+		curl_slist *headers = nullptr;
+		headers = curl_slist_append(headers, deepl::auth_header.c_str());
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, this->fields.c_str());
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, this->fields.size());
 
@@ -108,7 +111,6 @@ public:
 		bool should_cache = callback(response, status_code);
 		if(should_cache && status_code == 200)
 		{
-			fields.resize(short_len);
 			cache::set_or_get(fields, response);
 		}
 		return std::move(handle);
@@ -250,14 +252,7 @@ int deepl::make_request(bool preserve_formatting, const char *tag_handling, cons
 		return 0;
 	}
 
-	auto short_len = fields.size();
-
-	fields += "&auth_key=";
-	encoded = curl_easy_escape(curl, deepl::auth_key.c_str(), deepl::auth_key.size());
-	fields += encoded;
-	curl_free(encoded);
-
-	requests[curl] = std::unique_ptr<curl_request>(new curl_request(std::move(curl_handle), std::move(fields), short_len, std::move(callback)));
+	requests[curl] = std::unique_ptr<curl_request>(new curl_request(std::move(curl_handle), std::move(fields), std::move(callback)));
 	return curl_multi_add_handle(curlm_ptr.get(), curl);
 }
 
