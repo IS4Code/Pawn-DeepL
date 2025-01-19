@@ -1,7 +1,7 @@
-DeepL Plugin v1.1
+DeepL Plugin v1.3
 ==========
 
-This plugin adds integration for the [DeepL Translate API](https://www.deepl.com/docs-api/translate-text/translate-text/). To use the plugin, you have to provide your [DeepL authentication key](https://www.deepl.com/docs-api/api-access/authentication/).
+This plugin adds integration for the [DeepL Translate API](https://developers.deepl.com/docs/api-reference/translate). To use the plugin, you have to provide your [DeepL authentication key](https://developers.deepl.com/docs/getting-started/auth#authentication).
 
 *There are no warranties nor support for the quality of the translation, which is handled purely by DeepL and system-defined locale conversions.*
 
