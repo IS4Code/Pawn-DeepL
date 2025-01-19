@@ -6,7 +6,7 @@
 
 namespace deepl
 {
-	typedef std::function<bool(const std::string &response, long status_code)> callback_func;
+	typedef std::function<bool(bool success, const std::string &response, long status_code)> callback_func;
 
 	void load();
 	void process();

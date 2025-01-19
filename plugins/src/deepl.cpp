@@ -81,6 +81,7 @@ class curl_request
 	deepl::callback_func callback;
 
 	std::string response;
+	char error_buffer[CURL_ERROR_SIZE + 1] = {};
 
 	size_t write(char *ptr, size_t size, size_t nmemb)
 	{
@@ -92,6 +93,9 @@ public:
 	curl_request(curl_handle handle, std::string fields, deepl::callback_func callback) : handle(std::move(handle)), fields(std::move(fields)), callback(std::move(callback))
 	{
 		auto curl = this->handle.get();
+
+		curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
+
 		curl_slist *headers = nullptr;
 		headers = curl_slist_append(headers, deepl::auth_header.c_str());
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -108,10 +112,15 @@ public:
 
 	curl_handle finish(long status_code)
 	{
-		bool should_cache = callback(response, status_code);
-		if(should_cache && status_code == 200)
+		if(response.size() == 0 && error_buffer[0] != '\0')
 		{
-			cache::set_or_get(fields, response);
+			callback(false, error_buffer, status_code);
+		}else{
+			bool should_cache = callback(true, response, status_code);
+			if(should_cache && status_code == 200)
+			{
+				cache::set_or_get(fields, response);
+			}
 		}
 		return std::move(handle);
 	}
@@ -132,7 +141,7 @@ public:
 
 	void process() const
 	{
-		callback(response, 200);
+		callback(true, response, 200);
 	}
 };
 

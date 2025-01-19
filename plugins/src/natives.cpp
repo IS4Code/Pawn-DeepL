@@ -130,50 +130,62 @@ namespace Natives
 		}
 
 		auto amx_handle = get_amx(amx);
-		return deepl::make_request(preserve_formatting, tag_handling, formality, split_sentences, from, to, text, [callback, amx_handle, cookie, to_locale_ptr](const std::string &result, long status_code)
+		return deepl::make_request(preserve_formatting, tag_handling, formality, split_sentences, from, to, text, [callback, amx_handle, cookie, to_locale_ptr](bool success, const std::string &result, long status_code)
 		{
 			if(auto handle = amx_handle.lock())
 			{
 				auto amx = handle.get();
 
-				bool success = false;
 				std::string message;
 				std::string from;
-				auto json = json11::Json::parse(result, message);
-				if(json.is_object())
+				if(success)
 				{
-					for(const auto &item : json["translations"].array_items())
+					success = false;
+					auto json = json11::Json::parse(result, message);
+					if(json.is_object())
 					{
-						if(item.is_object())
+						for(const auto &item : json["translations"].array_items())
 						{
-							message = item["text"].string_value();
-							from = item["detected_source_language"].string_value();
-							success = true;
-							break;
+							if(item.is_object())
+							{
+								message = item["text"].string_value();
+								from = item["detected_source_language"].string_value();
+								success = true;
+								break;
+							}
+						}
+						if(!success)
+						{
+							const auto &msg = json["message"];
+							message = msg.string_value();
 						}
 					}
+
+					if(to_locale_ptr)
+					{
+						if(success)
+						{
+							try{
+								auto buffer = utf8.from_bytes(message);
+								message.resize(buffer.size(), '\0');
+								std::use_facet<std::ctype<wchar_t>>(*to_locale_ptr).narrow(buffer.data(), buffer.data() + buffer.size(), '?', &message[0]);
+							}catch(const std::exception &e)
+							{
+								message = e.what();
+								success = false;
+							}
+						}
+						delete to_locale_ptr;
+					}
+
 					if(!success)
 					{
-						const auto &msg = json["message"];
-						message = msg.string_value();
+						message += " (input: ";
+						message += result;
+						message += ")";
 					}
-				}
-
-				if(to_locale_ptr)
-				{
-					if(success)
-					{
-						try{
-							auto buffer = utf8.from_bytes(message);
-							message.resize(buffer.size(), '\0');
-							std::use_facet<std::ctype<wchar_t>>(*to_locale_ptr).narrow(buffer.data(), buffer.data() + buffer.size(), '?', &message[0]);
-						}catch(const std::exception &e)
-						{
-							message = e.what();
-							success = false;
-						}
-					}
-					delete to_locale_ptr;
+				}else{
+					message = result;
 				}
 
 				int index;
