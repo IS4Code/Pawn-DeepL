@@ -1,6 +1,6 @@
-GPP = g++ -m32 -std=c++11 -Ilib -Isrc -fno-stack-protector -nodefaultlibs
-GCC = gcc -m32 -Ilib -Isrc -fno-stack-protector -nodefaultlibs
-LINK = $(GCC) -Wl,-z,defs -lcurl
+GPP = g++ -m32 -std=c++11 -Ilib -Isrc -fno-stack-protector
+GCC = gcc -m32 -Ilib -Isrc -fno-stack-protector
+LINK = $(GPP) -Wl,-z,defs -lstdc++ -lcurl
 OUTFILE = "./DeepL.so"
 
 COMPILE_FLAGS = -c -O3 -fPIC -w -DLINUX -fno-operator-names
